@@ -3,13 +3,18 @@ using Microsoft.AspNetCore.Mvc;
 using System.Xml;
 using Newtonsoft.Json;
 using System.Xml.Linq;
+using InterviewTestService.BL;
 namespace InterviewTestService.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class MailParseController : ControllerBase
     {
-        public MailParseController() { }
+        IMailParseBL _mailParseBL;
+
+        public MailParseController(IMailParseBL mailParseBL) {
+            _mailParseBL = mailParseBL;
+        }
 
         [HttpPost("parsedata")]
         public IActionResult ParsedData([FromBody] MailData mailData)
@@ -56,8 +61,8 @@ namespace InterviewTestService.Controllers
             if (string.IsNullOrWhiteSpace(data))
                 return BadRequest(new { error = "No data provided." });
 
-            // 🧹 Step 1: Extract all possible tagged fields (no outer expense block)
-            // To detect malformed XML, wrap the message in a fake root node
+
+            // adding root node in order to make whole mail content valid XML
             string xmlWrapped = $"<root>{data}</root>";
 
             XElement xmlRoot;
@@ -70,33 +75,29 @@ namespace InterviewTestService.Controllers
                 return BadRequest(new { error = "Opening tags that have no corresponding closing tag." + ex.Message});
             }
 
-            // 🔍 Search all descendants (not just top-level)
+            // find required tags and gets their values
             string totalStr = xmlRoot.Descendants("total").FirstOrDefault()?.Value;
             string costCentre = xmlRoot.Descendants("cost_centre").FirstOrDefault()?.Value ?? "UNKNOWN";
-            string paymentMethod = xmlRoot.Descendants("payment_method").FirstOrDefault()?.Value ?? "UNKNOWN";
-
-
-            // 🧮 Step 3: Validate required <total>
+            string paymentMethod = xmlRoot.Descendants("cost_centre").FirstOrDefault()?.Value;
+             // Validate required <total> tag
             if (string.IsNullOrWhiteSpace(totalStr))
                 return BadRequest(new { error = "Missing required <total> field." });
 
             if (!decimal.TryParse(totalStr.Replace(",", ""), out decimal totalIncludingTax))
                 return BadRequest(new { error = "Invalid total amount format." });
 
-            // 🧮 Step 4: Calculate tax
-            const decimal taxRate = 0.10m; // 10%
-            decimal totalExcludingTax = totalIncludingTax / (1 + taxRate);
-            decimal salesTax = totalIncludingTax - totalExcludingTax;
+            // Calculate tax
+            var tax = _mailParseBL.CalculateTax(totalIncludingTax);
 
-            // ✅ Step 5: Build final response
+            // Build final response
             var result = new
             {
                 cost_centre = costCentre,
                 payment_method = paymentMethod,
                 total_including_tax = totalIncludingTax,
-                total_excluding_tax = Math.Round(totalExcludingTax, 2),
-                sales_tax = Math.Round(salesTax, 2),
-                tax_rate = (taxRate * 100) + "%"
+                total_excluding_tax = Math.Round(tax.TotalExcludingTax, 2),
+                tax_amt = Math.Round(tax.SalesTax, 2),
+                tax_rate = (tax.TaxRate * 100) + "%"
             };
 
             return Ok(result);
