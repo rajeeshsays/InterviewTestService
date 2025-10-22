@@ -9,6 +9,7 @@
             var tax = new TaxModel()
             {
                 TaxRate = taxRate,
+                TotalIncludingTax = totalIncludingTax,
                 TotalExcludingTax = totalIncludingTax / (1 + taxRate),
                 TaxAmt = totalIncludingTax - (totalIncludingTax / (1 + taxRate))
             };
@@ -19,6 +20,7 @@
         public class TaxModel
         {       
             public decimal TotalExcludingTax { get; set; }
+            public decimal TotalIncludingTax { get; set; }
             public decimal TaxAmt { get; set; }
             public decimal TaxRate { get; set; } 
         }

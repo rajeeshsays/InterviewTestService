@@ -4,6 +4,7 @@ using System.Xml;
 using Newtonsoft.Json;
 using System.Xml.Linq;
 using InterviewTestService.BL;
+
 namespace InterviewTestService.Controllers
 {
     [Route("api/[controller]")]
@@ -90,20 +91,28 @@ namespace InterviewTestService.Controllers
             var tax = _mailParseBL.CalculateTax(totalIncludingTax);
 
             // Build final response
-            var result = new
+            var result = new Response
             {
                 cost_centre = costCentre,
                 payment_method = paymentMethod,
                 total_including_tax = totalIncludingTax,
                 total_excluding_tax = Math.Round(tax.TotalExcludingTax, 2),
-                tax_amt = Math.Round(tax.SalesTax, 2),
+                tax_amt = Math.Round(tax.TaxAmt, 2),
                 tax_rate = (tax.TaxRate * 100) + "%"
             };
 
             return Ok(result);
         }
 
-
+        public class Response
+        {
+                public string cost_centre { get; set; }
+                public string? payment_method { get; set; }
+                public decimal total_including_tax { get; set; }
+                public decimal total_excluding_tax { get; set; }
+                public decimal tax_amt { get; set; }
+                public string? tax_rate { get; set; }
+        }
 
 
 
