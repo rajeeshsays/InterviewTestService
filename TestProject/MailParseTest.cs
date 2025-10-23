@@ -20,11 +20,11 @@ namespace TestProject
         }
 
         [Fact]
-        public void ParseDatav_ValidData_ReturnsOk()
+        public void ParseContent_ValidData_ReturnsOk()
         {
             // Arrange
             var xmlContent = "<cost_centre>DEV632</cost_centre><total>35000</total><payment_method>card</payment_method>";
-            var mailData = new MailParseController.MailData { data = xmlContent };
+            var mailData = new MailParseController.MailData { content = xmlContent };
             var tax = new TaxModel
             {
                 TaxRate = 0.10m,
@@ -35,7 +35,7 @@ namespace TestProject
             .Returns(tax);
 
             // Act
-            var response = _controller.ParseDatav(mailData);
+            var response = _controller.ParseContent(mailData);
         
             // Assert
             var json = Assert.IsType<OkObjectResult>(response);
@@ -47,14 +47,14 @@ namespace TestProject
         }
 
         [Fact]
-        public void ParseDatav_MissingTotal_ReturnsBadRequest()
+        public void ParseContent_MissingTotal_ReturnsBadRequest()
         {
             // Arrange
             var xmlContent = "<cost_centre>DEV632</cost_centre><payment_method>card</payment_method>";
-            var mailData = new MailParseController.MailData { data = xmlContent };
+            var mailData = new MailParseController.MailData { content = xmlContent };
 
             // Act
-            var result = _controller.ParseDatav(mailData);
+            var result = _controller.ParseContent(mailData);
 
             // Assert
             var badRequest = Assert.IsType<BadRequestObjectResult>(result);
@@ -62,14 +62,14 @@ namespace TestProject
         }
 
         [Fact]
-        public void ParseDatav_InvalidXml_ReturnsBadRequest()
+        public void ParseContent_InvalidXml_ReturnsBadRequest()
         {
             // Arrange
             var xmlContent = "<cost_centre>DEV632"; // malformed XML
-            var mailData = new MailParseController.MailData { data = xmlContent };
+            var mailData = new MailParseController.MailData { content = xmlContent };
 
             // Act
-            var result = _controller.ParseDatav(mailData);
+            var result = _controller.ParseContent(mailData);
 
             // Assert
             var badRequest = Assert.IsType<BadRequestObjectResult>(result);
@@ -77,14 +77,14 @@ namespace TestProject
         }
 
         [Fact]
-        public void ParseDatav_InvalidTotalFormat_ReturnsBadRequest()
+        public void ParseContent_InvalidTotalFormat_ReturnsBadRequest()
         {
             // Arrange
             var xmlContent = "<cost_centre>DEV632</cost_centre><total>invalid</total>";
-            var mailData = new MailParseController.MailData { data = xmlContent };
+            var mailData = new MailParseController.MailData { content = xmlContent };
 
             // Act
-            var result = _controller.ParseDatav(mailData);
+            var result = _controller.ParseContent(mailData);
 
             // Assert
             var badRequest = Assert.IsType<BadRequestObjectResult>(result);

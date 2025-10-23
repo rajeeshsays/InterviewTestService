@@ -17,54 +17,22 @@ namespace InterviewTestService.Controllers
             _mailParseBL = mailParseBL;
         }
 
-        [HttpPost("parsedata")]
-        public IActionResult ParsedData([FromBody] MailData mailData)
-        {
-            try
-            {
 
-
-                //string xmlData = @"<expense>
-                //              <cost_centre>DEV632</cost_centre>
-                //              <total>35,000</total>
-                //              <payment_method>personal card</payment_method>
-                //           </expens>";
-
-                // Load the XML
-                XmlDocument doc = new XmlDocument();
-                doc.LoadXml(mailData.data);
-                
-
-                // Convert XML to JSON
-                string json = JsonConvert.SerializeXmlNode(doc, Newtonsoft.Json.Formatting.Indented);
-
-                // Display JSON
-                Console.WriteLine(json);
-
-
-                return Ok(json);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-
-        }
         public class MailData
         {
-            public string data { get; set; }
+            public string content { get; set; }
         }
 
-        [HttpPost("parsedatav")]
-        public IActionResult ParseDatav([FromBody] MailData mailData)
+        [HttpPost("parsecontent")]
+        public IActionResult ParseContent([FromBody] MailData mailData)
         {
-            string data = mailData?.data;
-            if (string.IsNullOrWhiteSpace(data))
+            string content = mailData?.content;
+            if (string.IsNullOrWhiteSpace(content))
                 return BadRequest(new { error = "No data provided." });
 
 
             // adding root node in order to make whole mail content valid XML
-            string xmlWrapped = $"<root>{data}</root>";
+            string xmlWrapped = $"<root>{content}</root>";
 
             XElement xmlRoot;
             try
@@ -73,7 +41,7 @@ namespace InterviewTestService.Controllers
             }
             catch(Exception ex)
             {
-                return BadRequest(new { error = "Opening tags that have no corresponding closing tag." + ex.Message});
+                return BadRequest(new { error = "Opening tags that have no corresponding closing tag. see the details " + ex.Message});
             }
 
             // find required tags and gets their values
