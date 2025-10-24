@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using InterviewTestService.BL;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Xml;
 using Newtonsoft.Json;
+using System.Text.RegularExpressions;
+using System.Xml;
 using System.Xml.Linq;
-using InterviewTestService.BL;
 
 namespace InterviewTestService.Controllers
 {
@@ -22,6 +23,14 @@ namespace InterviewTestService.Controllers
         {
             public string content { get; set; }
         }
+        string CleanValue(string? input)
+        {
+            if (string.IsNullOrEmpty(input))
+                return string.Empty;
+
+            // Remove newline, tab, carriage return, and excessive spaces
+            return Regex.Replace(input, @"\s+", " ").Trim();
+        } 
 
         [HttpPost("parsecontent")]
         public IActionResult ParseContent([FromBody] MailData mailData)
@@ -45,9 +54,9 @@ namespace InterviewTestService.Controllers
             }
 
             // find required tags and gets their values
-            string totalStr = xmlRoot.Descendants("total").FirstOrDefault()?.Value;
-            string costCentre = xmlRoot.Descendants("cost_centre").FirstOrDefault()?.Value ?? "UNKNOWN";
-            string paymentMethod = xmlRoot.Descendants("cost_centre").FirstOrDefault()?.Value;
+            string totalStr = CleanValue(xmlRoot.Descendants("total").FirstOrDefault()?.Value);
+            string costCentre = CleanValue(xmlRoot.Descendants("cost_centre").FirstOrDefault()?.Value ?? "UNKNOWN");
+            string paymentMethod = CleanValue(xmlRoot.Descendants("payment_method").FirstOrDefault()?.Value);
              // Validate required <total> tag
             if (string.IsNullOrWhiteSpace(totalStr))
                 return BadRequest(new { error = "Missing required <total> field." });
