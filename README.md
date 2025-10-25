@@ -8,3 +8,12 @@ Things to Bring to Your Attention
 3.Additionally implemented a total value format checking.
 
 4.Traget Framework is .Core 8
+
+
+
+TEST Result from unit Testing
+-------------------------------
+
+
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/8ed825dc-093e-4c9a-921b-65bfa657d60f" />
