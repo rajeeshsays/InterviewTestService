@@ -7,7 +7,7 @@ Things to Bring to Your Attention
 
 3.Additionally implemented a total value format checking.
 
-4.Traget Framework is .Core 8
+4.Traget Framework is .Net Core 8
 
 
 
